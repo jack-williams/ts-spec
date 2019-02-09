@@ -141,7 +141,7 @@ X extends U ? A : B
 The semantics of instantiating the type with mapper `M`, written `M(X extends U ? A : B)`, is defined as follows:
 
 - If `M(X)` is a union type `(L | R)`, for some types `L` and `R`, then distribute as:
-      -  `(M . [X := L])(X extends U ? A : B) | (M . [X := R])(X extends U ? A : B)`.
+    * `(M . [X := L])(X extends U ? A : B) | (M . [X := R])(X extends U ? A : B)`.
 - If `M(X)` is `never`, then distribute over nothing and return `never`.
 - Otherwise, _resolve_ conditional type `(X extends U ? A : B)` using mapper `M`.
 
