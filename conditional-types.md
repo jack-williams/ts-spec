@@ -122,10 +122,44 @@ CheckNull<null | string>
 // The mapper is a function: Y => Y === X ? (null | string) : Y;
 ```
 
-Let `M` range over type mappers. We write `(M . [X := T])` to denote a mapper that sends type parameter `X` to the type `T`; in other words, the type parameter `X` is instantiated to `T`. We write `ID` for the identity type mapper; a mapper that sends all type parameters to themselves. In our example, we can denote the instantiation of `CheckNull` using the mapper `ID[X := (null | string)]`.
+We abstractly represent type mappers using the following notation. Let `M`, and `M'` range over type mappers. We write `(M . [X := U])` to denote a mapper that sends type parameter `X` to the type `U`, and forwards all other type parameters to mapper `M`. We write `ID` for the identity type mapper; a mapper that sends all type parameters to themselves. In our example, the instantiation of `CheckNull<null | string>` can be represented using the mapper `(ID . [X := (null | string)])`.
+
+We denote the application of a type mapper to a type using the notation `M(T)`. We overload the notation `M(T)` to denote the direct application of the mapper when `T` is a type parameters `X`. 
+
+In our example, we denote the instantiation of `CheckNull<null | string>` as:
+```
+(ID . [X := (null | string)])(CheckNull<X>)
+```
 
 ### Conditional Type Instantiation
 
-The instantiation of a conditional type controls the distrb
+The instantiation of a conditional type implements the distributive behaviour. Take the distributive conditional type:
+```ts
+X extends U ? A : B
+```
+
+The semantics of instantiating the type with mapper `M`, written `M(X extends U ? A : B)`, is defined as follows:
+
+- If `M(X)` is a union type `(L | R)`, for some types `L` and `R`, then distribute as:
+      -  `(M . [X := L])(X extends U ? A : B) | (M . [X := R])(X extends U ? A : B)`.
+- If `M(X)` is `never`, then distribute over nothing and return `never`.
+- Otherwise, _resolve_ conditional type `(X extends U ? A : B)` using mapper `M`.
+
+Resolving a conditional type is the process of simplifying a conditional type in the context of a type mapper. Think of resolution as attempting to "evaluate" the conditional type in the presence of type arguments. The semantics of resolution are defined in the following section.
+
+Instantiation of a non-distributive conditional type immediately proceeds to resolution. Take the non-distributive conditional type:
+```ts
+T extends U ? A : B
+```
+
+The semantics of instantiating the type with mapper `M`, written `M(T extends U ? A : B)`, is defined as follows:
+
+- Resolve conditional type `(T extends U ? A : B)` using mapper `M`.
+
+
+## Conditional Type Resolution
+
+
+
 
 
