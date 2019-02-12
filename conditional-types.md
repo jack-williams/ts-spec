@@ -1,5 +1,13 @@
 # Conditional Types
 
+1. [Introduction](#introduction)
+2. [Syntax](#syntax)
+3. [Distribution](#distributive-conditional-types)
+4. [Instantiation](#instantiation)
+5. [Resolution](#resolution)
+
+## Introduction
+
 Conditional types are the type analogue to conditional expressions. A conditional expression produces an expression based on the satisfaction of a boolean condition; a conditional type produces a type based on the satisfaction of an assignability condition.
 
 #### Example
