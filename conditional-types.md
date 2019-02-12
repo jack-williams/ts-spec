@@ -10,13 +10,16 @@
 
 Conditional types are the type analogue to conditional expressions. A conditional expression produces an expression based on the satisfaction of a boolean condition; a conditional type produces a type based on the satisfaction of an assignability condition.
 
-#### Example
+#### Example - *Conditional Expression*
+
 The code below defines a function using a conditional expression. When the function is applied to an argument that is equal to `null` the function returns the argument `0`, otherwise the function returns the argument `x`.
 ```ts
 const checkNull = x => x === null ? 0 : x;
 checkNull(null) // 0
 checkNull(42)   // 42
 ```
+
+#### Example - *Conditional Type*
 
 The code below defines a type alias using a conditional type. When the type alias is applied to a type that is assignable to `null` the alias returns the type `number`, otherwise the alias returns the type `X`.
 ```ts
@@ -30,7 +33,7 @@ Conditional types are a powerful mechanism to compose types and construct rich i
 
 ## Syntax
 
-Let `T`, `U`, `A`, and `B` denote types. Let `X` and `Y` denote type parameters. This syntax is convention, not specification. When we deviate from convention, or introduce new syntax, we make this explicit.
+Let `T`, `U`, `A`, and `B` denote types. Let `X` and `Y` denote type parameters. This syntax is convention, not specification. When we deviate from convention or introduce new syntax, we make this explicit.
 
 A conditional type has the form
 ```ts
@@ -49,7 +52,7 @@ X extends U ? A : B
 
 Specifically, a distributive conditional type is declared by defining a conditional type where the check type is a _naked type parameter_.
 
-#### Example
+#### Example - *Defining Distributive and Non-distributive Conditional Types*
 
 The type `CheckNull` is a distributive conditional type because the check type is the naked type parameter `X`. The type `StringIs` is a non-distributive conditional type because the check type is _not_ a naked type parameter---the check type is the type `string`.
 ```ts
@@ -59,7 +62,7 @@ type StringIs<X>  = string extends X ? true : false
 
 The salient trait of a distributive conditional type is its ability to distribute over union types.
 
-#### Example
+#### Example - *Distributing Over Union*
 When `CheckNull` is applied to a union type the conditional is first distributed over each union branch, then the conditional type is resolved for each branch.
 ```ts
 CheckNull<null | string> // number | string
@@ -70,7 +73,7 @@ CheckNull<null | string> // number | string
 // --> number | string
 ```
 
-#### Example
+#### Example - *Treating Union Atomically*
 A non-distributive conditional type  treats union types atomically; the conditional type is resolved using the complete union type.
 ```ts
 StringIs<null | string> // true
@@ -82,7 +85,7 @@ StringIs<null | string> // true
 
 A second trait of distributive conditional types is that they _short-circuit_ on application to never. The technical intuition is that `never` denotes the _empty union type_, and therefore there is nothing to distribute over; consequently, the result is the empty union type `never`. Non-distributive conditional types do not short-circuit, rather, they treat `never` like any other type.
 
-#### Example
+#### Example - *Distributing Over `never`, or Short-circuiting*
 ```ts
 CheckNull<never> // never
 
@@ -97,7 +100,7 @@ IsString<never> // false
 
 There are situations where it is desirable to define a non-conditional type, where the check type is a type parameter. The canonical example is the type `IsNever<X>`. The type should return `true` when `X` is `never` and `false` otherwise.
 
-#### Example
+#### Example - *Failing to Capture `never`*
 The following example is defined using a distributive conditional type and does not give the desired behaviour because it short-circuits on `never`.
 ```ts
 type IsNeverWrong<X> = X extends never ? true : false
@@ -106,7 +109,7 @@ IsNeverWrong<never> // never
 
 To prevent distribution, wrap the _check_ and _extends_ type using a one-tuple.
 
-#### Example
+#### Example - *Suppressing Distribution*
 ```ts
 type IsNever<X> = [X] extends [never] ? true : false
 IsNever<never> // true
@@ -120,7 +123,8 @@ The mechanism behind distribution is _instantiation_: the act of applying type a
 
 Applying type arguments to a generic type will _instantiate_ the type parameters in the body of the generic type; in other words, the type parameters are substituted for their arguments. Instantiations, or substitutions, can be modelled in multiple ways. We present the approach taken in the TypeScript compiler and use a function called a _mapper_. A type mapper is a function from type parameters to types, transforming type parameters into their instantiated type.
 
-#### Example
+#### Example - *Type Instantiation and Mappers*
+
 Applying `CheckNull` to the type `null | string` will instantiate type parameter `X` with the type `null | string`. The instantiation can be modelled using a mapper function on type parameters. If the argument parameter `Y` is equal to `X` then return the type argument `null | string`, otherwise return parameter `Y`.
 ```ts
 type CheckNull<X> = X extends null ? number : X
