@@ -157,7 +157,7 @@ The semantics of instantiating the type with mapper `M`, written `M(T extends U 
 - Resolve conditional type `(T extends U ? A : B)` using mapper `M`.
 
 
-## Conditional Type Resolution
+## Resolution
 
 
 
