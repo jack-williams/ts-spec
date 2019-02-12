@@ -92,7 +92,7 @@ There are situations where it is desirable to define a non-conditional type, whe
 #### Example
 The following example is defined using a distributive conditional type and does not give the desired behaviour because it short-circuits on `never`.
 ```ts
-IsNeverWrong<X> = X extends never ? true : false
+type IsNeverWrong<X> = X extends never ? true : false
 IsNeverWrong<never> // never
 ```
 
@@ -100,7 +100,7 @@ To prevent distribution, wrap the _check_ and _extends_ type using a one-tuple.
 
 #### Example
 ```ts
-IsNever<X> = [X] extends [never] ? true : false
+type IsNever<X> = [X] extends [never] ? true : false
 IsNever<never> // true
 ```
 
