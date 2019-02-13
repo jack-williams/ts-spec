@@ -5,6 +5,7 @@
 3. [Distribution](#distributive-conditional-types)
 4. [Instantiation](#instantiation)
 5. [Resolution](#resolution)
+6. [Typing Relations](#typing-relations)
 
 ## Introduction
 
@@ -29,7 +30,7 @@ CheckNull<string> // string
 ```
 
 
-Conditional types are a powerful mechanism to compose types and construct rich interfaces. The central concepts of conditional types are distribution, instantiation, and reduction; each concept is discussed in this document. First, we describe the syntax and declaration of conditional types.
+Conditional types are a powerful mechanism to compose types and construct rich interfaces. The central concepts of conditional types are distribution, instantiation, and reduction; each concept is discussed in this document. We also describe how conditional types relate to other types under the typing relations. First, we begin by presenting the syntax and declaration of conditional types.
 
 ## Syntax
 
@@ -170,6 +171,8 @@ The semantics of instantiating the type with mapper `M`, written `M(T extends U 
 
 
 ## Resolution
+
+## Typing Relations
 
 
 
