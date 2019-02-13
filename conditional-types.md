@@ -29,6 +29,7 @@ CheckNull<null>   // number
 CheckNull<string> // string
 ```
 
+#### Overview
 
 Conditional types are a powerful mechanism to compose types and construct rich interfaces. The central concepts of conditional types are distribution, instantiation, and reduction; each concept is discussed in this document. We also describe how conditional types relate to other types under the typing relations. First, we begin by presenting the syntax and declaration of conditional types.
 
