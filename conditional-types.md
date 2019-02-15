@@ -125,7 +125,7 @@ IsNeverWrong<never> // never
 // --> never
 ```
 
-To prevent distribution, wrap the _check_ and _extends_ type using a one-tuple.
+To prevent distribution: wrap the _check_ and _extends_ type using a one-tuple.
 
 #### Example - *Suppressing Distribution*
 ```ts
