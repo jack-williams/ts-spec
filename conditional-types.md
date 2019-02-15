@@ -79,7 +79,7 @@ CheckNull<null | string> // number | string
 ```
 
 #### Example - *Treating Union Atomically*
-A non-distributive conditional type treats union types atomically. When the extends type is replaced by the union type `null | string` we do not apply the conditional type to each componenent; the union type is viewed atomically. 
+A non-distributive conditional type treats union types atomically. When the extends type is replaced by the union type `null | string` we do not apply the conditional type to each componenent. 
 ```ts
 StringIs<null | string> // true
 
