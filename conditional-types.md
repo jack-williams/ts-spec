@@ -195,6 +195,8 @@ X extends U ? A : B
 
 The semantics of instantiating a distributive condition type with mapper `M`, written `M(X extends U ? A : B)`, is defined as follows:
 
+#### Definition - Instantiation of Distributive Conditional Types 
+
 Define `M(X extends U ? A : B)` as:
 - If `M(X)` is a union type `(L | R)`, for some types `L` and `R`, then distribute as:
     * `(M . [X := L])(X extends U ? A : B) | (M . [X := R])(X extends U ? A : B)`.
@@ -208,6 +210,8 @@ T extends U ? A : B
 ```
 
 The semantics of instantiating the type with mapper `M`, written `M(T extends U ? A : B)`, is defined as follows:
+
+#### Definition - Instantiation of Non-distributive Conditional Types 
 
 Define `M(T extends U ? A : B)`, where `T` is not a type parameter. as:
 - `resolve(X extends U ? A : B, M)`.
