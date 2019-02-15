@@ -17,7 +17,7 @@ The code below defines a function using a conditional expression. When the funct
 ```ts
 const checkNull = x => x === null ? 0 : x;
 checkNull(null) // 0
-checkNull("hi") // 42
+checkNull("hi") // "hi"
 ```
 
 #### Example - *Conditional Type*
