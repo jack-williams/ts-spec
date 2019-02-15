@@ -213,7 +213,7 @@ The semantics of instantiating the type with mapper `M`, written `M(T extends U 
 
 #### Definition - _Instantiation of Non-distributive Conditional Types_
 
-Define `M(T extends U ? A : B)`, where `T` is not a type parameter. as:
+Define `M(T extends U ? A : B)`, where `T` is not a type parameter, as:
 - `resolve(X extends U ? A : B, M)`.
 
 The function `resolve(T extends U ? A : B, M)` is defined in the following section.
