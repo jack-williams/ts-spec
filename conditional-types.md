@@ -209,7 +209,7 @@ T extends U ? A : B
 
 The semantics of instantiating the type with mapper `M`, written `M(T extends U ? A : B)`, is defined as follows:
 
-Define `M(T extends U ? A : B)` as:
+Define `M(T extends U ? A : B)`, where `T` is not a type parameter. as:
 - `resolve(X extends U ? A : B, M)`.
 
 The function `resolve(T extends U ? A : B, M)` is defined in the following section.
