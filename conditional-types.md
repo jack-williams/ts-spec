@@ -65,7 +65,7 @@ type CheckNull<X> = X extends null ? number : X
 type StringIs<X>  = string extends X ? true : false
 ```
 
-Distribution happens when the check type is replaced by a union type; this process is known as [instantiation](#instantiation). The union type will be decomposed and the conditional type is applied to each component.
+Distribution occurs when the check type is replaced by a union type; this process is known as [instantiation](#instantiation). The union type will be decomposed and the conditional type is applied to each component.
 
 #### Example - *Distributing Over Union*
 When `CheckNull` is applied to a union type the conditional type is first distributed over each union branch, then the conditional type is resolved for each branch. Resolving a conditional type is the process of simplifying a conditional type. Think of resolution as attempting to "evaluate" the conditional type. The semantics of resolution are defined in Section [5](#resolution).
