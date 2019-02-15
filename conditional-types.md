@@ -31,7 +31,9 @@ CheckNull<string> // string
 
 #### Overview
 
-Conditional types are a powerful mechanism to compose types and construct rich interfaces. The central concepts of conditional types are distribution, instantiation, and reduction; each concept is discussed in this document. We also describe how conditional types relate to other types under the typing relations. First, we begin by presenting the syntax and declaration of conditional types.
+Conditional types are a powerful mechanism to compose types and construct rich interfaces. The central concepts of conditional types are distribution, instantiation, and reduction; each concept is discussed in this document. We also describe how conditional types relate to other types under the typing relations. 
+
+First, we begin by presenting the syntax and declaration of conditional types.
 
 ## Syntax
 
@@ -46,7 +48,8 @@ We refer to `T` as the _check_ type, `U` as the _extends_ types, `A` as the _tru
 
 ## Distributive Conditional Types
 
-A distributive conditional type is a particular variant of conditional type that is characterised by its instantiation and reduction behaviour. The distributive property of a conditional type is determined at the definition of the type. A distributive conditional types is declared using the form:
+A distributive conditional type is a particular variant of conditional type. The essence of a distributive conditional type is that it will apply itself to each component of a union type, while a non-distributive conditional type will treat a union type atomically. 
+The distributive property of a conditional type is determined at the definition of the type. A distributive conditional type is declared using the form:
 
 ```ts
 X extends U ? A : B
@@ -56,16 +59,17 @@ Specifically, a distributive conditional type is declared by defining a conditio
 
 #### Example - *Defining Distributive and Non-distributive Conditional Types*
 
-The type `CheckNull` is a distributive conditional type because the check type is the naked type parameter `X`. The type `StringIs` is a non-distributive conditional type because the check type is _not_ a naked type parameter---the check type is the type `string`.
+The type `CheckNull` is a distributive conditional type because the check type is the naked type parameter `X`. The type `StringIs` is a non-distributive conditional type because the check type is _not_ a naked type parameter---the check type is the concrete type `string`. Naked type parameters that occur in the extends type do not affect distribution; distribution _only_ happens in the check type.
 ```ts
 type CheckNull<X> = X extends null ? number : X
 type StringIs<X>  = string extends X ? true : false
 ```
 
-The salient trait of a distributive conditional type is its ability to distribute over union types.
+Distribution happens when the check type is replaced by a union type; this process is known as [instantiation](#instantiation). The union type will be decomposed and the conditional type is applied to each component.
 
 #### Example - *Distributing Over Union*
-When `CheckNull` is applied to a union type the conditional is first distributed over each union branch, then the conditional type is resolved for each branch.
+When `CheckNull` is applied to a union type the conditional type is first distributed over each union branch, then the conditional type is resolved for each branch. Resolving a conditional type is the process of simplifying a conditional type. Think of resolution as attempting to "evaluate" the conditional type. The semantics of resolution are defined in Section [5](#resolution).
+
 ```ts
 CheckNull<null | string> // number | string
 
@@ -76,7 +80,7 @@ CheckNull<null | string> // number | string
 ```
 
 #### Example - *Treating Union Atomically*
-A non-distributive conditional type  treats union types atomically; the conditional type is resolved using the complete union type.
+A non-distributive conditional type treats union types atomically. When the extends type is replaced by the union type `null | string` we do not apply the conditional type to each componenent; the union type is viewed atomically. 
 ```ts
 StringIs<null | string> // true
 
@@ -85,11 +89,20 @@ StringIs<null | string> // true
 // --> true
 ```
 
-A second trait of distributive conditional types is that they _short-circuit_ on application to never. The technical intuition is that `never` denotes the _empty union type_, and therefore there is nothing to distribute over; consequently, the result is the empty union type `never`. Non-distributive conditional types do not short-circuit, rather, they treat `never` like any other type.
+A second trait of distributive conditional types is that they _short-circuit_ when the check type is replaced by `never`. The technical intuition is that `never` denotes the _empty union type_; we are distributing over "nothing". The result of replacing the check type with `never` is immediately `never`.
+
+Technically this trait follows immediately from the definition of mapping over union types, and is not an explicitly defined secondary behaviour. We distinguish the two traits because it practice it is not obvious that short-circuiting follows from distribution.
+
+Non-distributive conditional types do not short-circuit. Replacing the extends type with `never` will not cause the conditional type to immediately resolve to `never`.
 
 #### Example - *Distributing Over `never`, or Short-circuiting*
 ```ts
 CheckNull<never> // never
+
+//     CheckNull<never>
+// --> never extends null ? number : null
+// --> never
+
 
 IsString<never> // false
 
@@ -100,13 +113,17 @@ IsString<never> // false
 
 ### Disabling Distribution
 
-There are situations where it is desirable to define a non-conditional type, where the check type is a type parameter. The canonical example is the type `IsNever<X>`. The type should return `true` when `X` is `never` and `false` otherwise.
+There are situations where it is desirable to define a non-distributive conditional type where the check type is a type parameter. The canonical example is the type `IsNever<X>`. The type should return `true` when `X` is `never` and `false` otherwise.
 
 #### Example - *Failing to Capture `never`*
-The following example is defined using a distributive conditional type and does not give the desired behaviour because it short-circuits on `never`.
+The following example is defined using a distributive conditional type which does not give the desired behaviour because it short-circuits on `never`.
 ```ts
 type IsNeverWrong<X> = X extends never ? true : false
 IsNeverWrong<never> // never
+
+//     IsNeverWrong<never>
+// --> never extends never ? true : false
+// --> never
 ```
 
 To prevent distribution, wrap the _check_ and _extends_ type using a one-tuple.
@@ -115,11 +132,15 @@ To prevent distribution, wrap the _check_ and _extends_ type using a one-tuple.
 ```ts
 type IsNever<X> = [X] extends [never] ? true : false
 IsNever<never> // true
+
+//     IsNever<never>
+// --> [never] extends [never] ? true : false
+// --> true
 ```
 
 The check type is not a naked type parameter and therefore `IsNever` is not a distributive conditional type. Assignability lifts to tuples: if `A extends B`, then `[A] extends [B]`. Using the one-tuple in the type retains the correct conditional behaviour, without the distribution.
 
-The mechanism behind distribution is _instantiation_: the act of applying type arguments to a generic type. We know discuss the semantics of instantiation for conditional types.
+The core mechanism behind distribution is _instantiation_: the act of applying type arguments to a generic type. We now discuss the semantics of instantiation for conditional types.
 
 ## Instantiation
 
@@ -127,7 +148,8 @@ Applying type arguments to a generic type will _instantiate_ the type parameters
 
 #### Example - *Type Instantiation and Mappers*
 
-Applying `CheckNull` to the type `null | string` will instantiate type parameter `X` with the type `null | string`. The instantiation can be modelled using a mapper function on type parameters. If the argument parameter `Y` is equal to `X` then return the type argument `null | string`, otherwise return parameter `Y`.
+Applying `CheckNull` to the type `null | string` will instantiate type parameter `X` with the type `null | string`. The instantiation can be modelled using a mapper function on type parameters. 
+
 ```ts
 type CheckNull<X> = X extends null ? number : X
 CheckNull<null | string>
@@ -136,11 +158,30 @@ CheckNull<null | string>
 // The mapper is a function: Y => Y === X ? (null | string) : Y;
 ```
 
-We abstractly represent type mappers using the following notation. Let `M`, and `M'` range over type mappers. We write `(M . [X := U])` to denote a mapper that sends type parameter `X` to the type `U`, and forwards all other type parameters to mapper `M`. We write `ID` for the identity type mapper; a mapper that sends all type parameters to themselves. In our example, the instantiation of `CheckNull<null | string>` can be represented using the mapper `(ID . [X := (null | string)])`.
+If the argument type parameter `Y` is equal to type parameter `X` then return the type argument `null | string`, otherwise return parameter `Y`.
 
-We denote the application of a type mapper to a type using the notation `M(T)`. We overload the notation `M(T)` to denote the direct application of the mapper when `T` is a type parameters `X`. 
+We abstractly represent type mappers using the following notation. Let `M`, and `M'` range over type mappers. We write `(M . [X := U])` to denote a mapper that maps type parameter `X` to type `U`, and forwards all other type parameters to mapper `M`. Informally, this can be defined as:
 
-In our example, we denote the instantiation of `CheckNull<null | string>` as:
+```
+(M . [X := U]) is defined as  Y => Y === X ? U : M(X)
+```
+
+We denote the application of a type mapper to a type variable using the notation `M(X)`.
+
+We write `ID` for the identity type mapper; a mapper that sends all type parameters to themselves. Informally, this can be defined as:
+
+```
+ID is defined as Y => Y
+```
+
+In our example, the instantiation of `CheckNull<null | string>` can be represented using the mapper `(ID . [X := (null | string)])`. Unfolding the definition makes the behaviour clear:
+
+```
+(ID . [X := (null | string)]) is defined as Y => Y === X ? (null | string) : ID(Y)
+```
+
+We overload the notation `M(T)` to denote the direct application a mapper `M` to type `T`. This is the instantiation of type `T` using mapper `M`. In our example, we denote the instantiation of `CheckNull<null | string>` as:
+
 ```
 (ID . [X := (null | string)])(CheckNull<X>)
 ```
@@ -148,18 +189,19 @@ In our example, we denote the instantiation of `CheckNull<null | string>` as:
 ### Conditional Type Instantiation
 
 The instantiation of a conditional type implements the distributive behaviour. Take the distributive conditional type:
+
 ```ts
 X extends U ? A : B
 ```
 
-The semantics of instantiating the type with mapper `M`, written `M(X extends U ? A : B)`, is defined as follows:
+The semantics of instantiating a distributive condition type with mapper `M`, written `M(X extends U ? A : B)`, is defined as follows:
 
+Define `M(X extends U ? A : B)` as:
 - If `M(X)` is a union type `(L | R)`, for some types `L` and `R`, then distribute as:
     * `(M . [X := L])(X extends U ? A : B) | (M . [X := R])(X extends U ? A : B)`.
 - If `M(X)` is `never`, then distribute over nothing and return `never`.
-- Otherwise, _resolve_ conditional type `(X extends U ? A : B)` using mapper `M`.
+- Otherwise, `resolve(X extends U ? A : B, M)`.
 
-Resolving a conditional type is the process of simplifying a conditional type in the context of a type mapper. Think of resolution as attempting to "evaluate" the conditional type in the presence of type arguments. The semantics of resolution are defined in the following section.
 
 Instantiation of a non-distributive conditional type immediately proceeds to resolution. Take the non-distributive conditional type:
 ```ts
@@ -168,14 +210,11 @@ T extends U ? A : B
 
 The semantics of instantiating the type with mapper `M`, written `M(T extends U ? A : B)`, is defined as follows:
 
-- Resolve conditional type `(T extends U ? A : B)` using mapper `M`.
+Define `M(T extends U ? A : B)` as:
+- `resolve(X extends U ? A : B, M)`.
 
+The function `resolve(T extends U ? A : B, M)` is defined in the following section.
 
 ## Resolution
 
 ## Typing Relations
-
-
-
-
-
