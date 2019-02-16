@@ -262,4 +262,14 @@ The wildcard instantiation will map all type parameters to the wildcard type.
 
 #### Restrictive Instantiation - *The Most Conservative Instantiation*
 
+The constraint of a type parameter gives an upper-bound on the types that are allowed to instantiate that type parameter. A type parameter `X extends string` will be instantiated with a type at least a precise as type `string`, but possible more precise. A type parameter `X extends unknown` has the most conservative constraint. The type `unknown` is the top type: all types are assignable to `unknown`. The `unknown` constraint is the most conservative because it does not rule out any instantiation of the type parameter.
+
+We write `M[Top]` for the restrictive instantiation, or mapper.
+
+```
+M[Top] is defined as Y => (Y extends unknown)
+```
+
+The restrictive instantiation will map all type parameters to the input parameter with an `unknown` constraint. If the input parameter has a type constraint this will be erased and replaced with `unknown`. For example, `M[Top](X extends string) === X extends unknown`.
+
 ## Typing Relations
