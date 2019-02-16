@@ -280,4 +280,20 @@ The restrictive instantiation will map all type parameters to the input paramete
 M[Top](X extends string) === (X extends unknown)
 ```
 
+We may now define conditional type resolution.
+
+#### Definition - _Conditional Type Resolution_
+
+Define `resolve(T extends U ? A : B, M)` as:
+- Let `Check = M(T)` and `Ext = M(U)`.
+- If `Check` is the wildcard type `*` then resolve to `*`.
+- If `Ext` is the wildcard type `*` then resolve to `*`.
+- If at least one of `Check` or `Ext` is a type parameter `X`, or a generic mapped type, return the deferred conditional type `|Check| extends Ext ? A : B`.
+  - The operator `|T|` on types will strip type substitutions from `T` when `T` is a substitution type.
+- If `Ext` is the type `any` or the type `unknown` resolve to `M(A)`.
+- If `Check` is the type `any` resolve to `M(A) | M(B)`.
+- If `M[*](Check)` is not assignable to `M[*](Ext)` resolve to  `M(B)`.
+- If `M[Top](Check)` is assignable to `M[Top](Ext)` resolve to  `M(A)`.
+- Otherwise, return the deferred conditional type `|Check| extends Ext ? A : B`.
+
 ## Typing Relations
