@@ -252,13 +252,17 @@ Before describing the semantics of `resolve(T extends U ? A : B, M)` we present 
 
 The wildcard type is the most permissive type: it is assignable to and from all types. The wildcard type is more permissive than `any`; the former is assignable to `never` while the latter is not. We denote the wildcard type using `*`, which is inspired from the dynamic type in gradual typing. This syntax is not official. There is no explicit syntax for the wildcard type because it only exists in the context of conditional type resolution. A wildcard type cannot be used in a type definition.
 
-We write `M*` for the wildcard instantiation, or mapper.
+We write `M[*]` for the wildcard instantiation, or mapper.
 
 ```
-M* is defined as () => *
+M[*] is defined as () => *
 ```
 
 The wildcard instantiation will map all type parameters to the wildcard type.
+
+```
+M[*](X extends string) === *
+```
 
 #### Restrictive Instantiation - *The Most Conservative Instantiation*
 
