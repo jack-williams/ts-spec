@@ -220,4 +220,29 @@ The function `resolve(T extends U ? A : B, M)` is defined in the following secti
 
 ## Resolution
 
+At some point we want to know what a conditional type "evaluates" to and we refer to this process as resolution. There are two outcomes from conditional type resolution. 
+
+**Resolved:** When we have sufficient evidence to prove that the condition is definitely true, or definitely false, we say that the conditional type is _resolved_. This eliminates the condition and replaces the conditional type with the selected branch.
+
+**Deferred:** When we do _not_ have sufficient evidence to prove that the condition is definitely true, or definitely false, we say that the conditional type is _deferred_. The deferred conditional type may differ from the input conditional type. For example, resolution accepts a type mapper and therefore type parameters that were in the input type may be instantiated in the output type.
+
+#### Example - *Simple Resolution and Deferral*
+
+```ts
+type StringIs<X>  = string extends X ? true : false
+
+function simpleResolution(x: string)  {
+  const isString: StringIs<typeof x> = true;
+}
+
+function simpleDeferral<X extends string>(x: X)  {
+  const isString: StringIs<typeof x> = true; // error
+}
+```
+
+In the body of `simpleResolution` the conditional type `StringIs<typeof x>` is _resolved_. We know that `x` has type `string`, and `string` always extends `string`, so the conditional type is resolved to `true`. The assignment of `true` is safe.
+
+In the body of `simpleDeferral` the conditional type `StringIs<typeof x>` is _deferred_. **Why?** We know that `x` is a type parameter with constraint `string`; the type of `x` will be at least as precise as type `string`, but it could be more precise. If we instantiate `X` with the `string` then the condition `string extends X` will be true. If we instantiate `X` with the `"hello"`, a subtype of `string`, then the condition `string extends X` will be false. In the body of the function we do not know what the instantiation of `X` will be; we do not have enough information and consequently the conditional type is deferred. The assignment of `true` is not safe.
+
+
 ## Typing Relations
