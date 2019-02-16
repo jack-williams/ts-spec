@@ -277,7 +277,7 @@ M[Top] is defined as Y => (Y extends unknown)
 The restrictive instantiation will map all type parameters to the input parameter with an `unknown` constraint. If the input parameter has a type constraint this will be erased and replaced with `unknown`. For example:
 
 ```
-M[Top](X extends string) === (X extends unknown).
+M[Top](X extends string) === (X extends unknown)
 ```
 
 ## Typing Relations
