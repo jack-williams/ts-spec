@@ -244,5 +244,22 @@ In the body of `simpleResolution` the conditional type `StringIs<typeof x>` is _
 
 In the body of `simpleDeferral` the conditional type `StringIs<typeof x>` is _deferred_. **Why?** We know that `x` is a type parameter with constraint `string`; the type of `x` will be at least as precise as type `string`, but it could be more precise. If we instantiate `X` with the `string` then the condition `string extends X` will be true. If we instantiate `X` with the `"hello"`, a subtype of `string`, then the condition `string extends X` will be false. In the body of the function we do not know what the instantiation of `X` will be; we do not have enough information and consequently the conditional type is deferred. The assignment of `true` is not safe.
 
+### Preliminaries
+
+Before describing the semantics of `resolve(T extends U ? A : B, M)` we present some preliminary definitions and terminology.
+
+#### Wildcard Instantiation - *The Most Permissive Instantiation*
+
+The wildcard type is the most permissive type: it is assignable to and from all types. Wildcard is even more permissive than `any`; the former is assignable to `never` while the latter is note. We denote the wildcard type using `*`, which is inspired from the dynamic type in gradual typing. The syntax is not official; there is no explicit syntax for the wildcard type because it is only exists in the context of conditional type resolution. A wildcard type cannot be used in a type definition.
+
+We write `*` for the wildcard instantiation, or mapper.
+
+```
+M* is defined as () => *
+```
+
+The wildcard instantiation will map all type parameters to the wildcard type.
+
+#### Restrictive Instantiation - *The Most Conservative Instantiation*
 
 ## Typing Relations
