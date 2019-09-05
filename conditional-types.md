@@ -182,7 +182,7 @@ In our example, the instantiation of `CheckNull<null | string>` can be represent
 We overload the notation `M(T)` to denote the direct application a mapper `M` to type `T`. This is the instantiation of type `T` using mapper `M`. In our example, we denote the instantiation of `CheckNull<null | string>` as:
 
 ```
-(ID . [X := (null | string)])(CheckNull<X>)
+(ID . [X := (null | string)])(X extends null ? number : X)
 ```
 
 ### Conditional Type Instantiation
