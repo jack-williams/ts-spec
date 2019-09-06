@@ -229,21 +229,23 @@ At some point we want to know what a conditional type "evaluates" to and we refe
 #### Example - *Simple Resolution and Deferral*
 
 ```ts
-type StringIs<X>  = string extends X ? true : false
+type StringIs<X> = string extends X ? true : false
 
-function simpleResolution(x: string)  {
-  const isString: StringIs<typeof x> = true;
+function simpleResolution(x: string) {
+    const xIsString: StringIs<typeof x> = true;
 }
 
-function simpleDeferral<X extends string>(x: X)  {
-  const isString: StringIs<typeof x> = true; // error
+function simpleDeferral<Y>(y: Y) {
+    const yIsString: StringIs<typeof y> = true; // error
+    // The conditional type StringIs<typeof y> remains deferred
+    // because we do not have sufficient information to know that
+    // string extends Y.
 }
 ```
 
-In the body of `simpleResolution` the conditional type `StringIs<typeof x>` is _resolved_. We know that `x` has type `string`, and `string` always extends `string`, so the conditional type is resolved to `true`. The assignment of `true` is safe.
+In the body of `simpleResolution` the conditional type `StringIs<typeof x>` is _resolved_. We know that `x` has type `string`, and `string` extends `string`, so the conditional type is resolved to `true`. The assignment of `true` to `xIsString` is safe.
 
-In the body of `simpleDeferral` the conditional type `StringIs<typeof x>` is _deferred_. **Why?** We know that `x` is a type parameter with constraint `string`; the type of `x` will be at least as precise as type `string`, but it could be more precise. If we instantiate `X` with the `string` then the condition `string extends X` will be true. If we instantiate `X` with the literal type `"hello"`, a subtype of `string`, then the condition `string extends X` will be false. In the body of the function we do not know what the instantiation of `X` will be. We do not have enough information to determine in the condition is definitely true, or definitely false, and consequently the conditional type is deferred. The assignment of `true` is not safe.
-
+In the body of `simpleDeferral` the conditional type `StringIs<typeof y>` is _deferred_. **Why?**  The type of `y` is the type parameter `Y` that could be instantiated by a caller with any type. A caller of `simpleDeferral` could instantiate `Y` as `string`, in which case the condition would be satisfied; a caller could also instantiate `Y` as `boolean`, in which case the condition would not be satisfied. As we do not have sufficient information to know whether the condition will be true or false we must defer the conditional type. The assignment of `true` to `yIsString` is not safe.
 ### Preliminaries
 
 Before describing the semantics of `resolve(T extends U ? A : B, M)` we present some preliminary definitions and terminology.
