@@ -5,7 +5,7 @@
 3. [Distribution](#distributive-conditional-types)
 4. [Instantiation](#instantiation)
 5. [Resolution](#resolution)
-6. [Typing Relations](#typing-relations)
+6. [Typing Relations](#type-relations)
 
 ## Introduction
 
@@ -298,4 +298,34 @@ Define `resolve(T extends U ? A : B, M)` as:
 - If `M[Top](Check)` is assignable to `M[Top](Ext)` resolve to  `M(A)`.
 - Otherwise, return the deferred conditional type `|Check| extends Ext ? A : B`.
 
-## Typing Relations
+## Type Relations
+
+### A Brief Introduction to Type Relations
+
+A type relation describes some property between two types. In TypeScript this property is usually that one type is approximated by another, or that all values associated with one type are also associated with another. During type-checking we are frequently asking questions about whether one type is related to another.
+
+Type relations in TypeScript are rules defined coinductively on the structure of types: two types are related if their parts or related. This structural quality is known as congruence and means that many of the rules which determine if two types are related are parametric in the relation they are checking. For example, a type `T[]` is related to type `U[]` if `T` is related to `U`, but we do not need to know _which_ particular relation we are checking to state this claim.
+
+When defining type relations we define them parametric to the particular relation we are checking by saying: _type `T` is related to type `U` if..._. During type-checking the checker will select the concrete relation it needs depending on the context. There are four concrete type relations in TypeScript[1]: subtype, assignable, comparable, and identity. Note that some type relation rules refer to specific relations, which we make explicit.
+
+[1] There is actually a fifth type relation: the enum relation. We omit this from the main definition because the relation only relates two enums, rather than two arbitrary types.
+
+### Type Relation for Conditional Types
+
+We now describe the subset of type relation rules that are relevant for conditional types. Let `T {R} U` denote that `T` is related to `U` under relation `R`, where `R` is one of the four relations denoted: `<:` (subtype), `~`(assignable), `?=` (comparable), and `=` (identity).
+
+Define `T {R} U` as:
+- Let `Tsimp = simplify(T)` and `Usimp = simplify(U)`
+- If `Tsimp = Tcheck extends Texds ? Tl : Tr` and `Usimp = Ucheck extends Uexds ? Ul : Ur`
+  - If `R` is the identity relation then `T = U` when
+    - `Tsimp` is distributive iff `Usimp` is distributive
+    - `Tcheck = Ucheck` and `Texds = Uexds` and `Tl = Ul` and `Tr = Ur`
+  - Else, `T {R} U` when
+    - `Tcheck {R} Ucheck` or `Ucheck {R} Tcheck`
+    - `Texds = Uexds`
+    - `Tl {R} Ul` and `Tr {R} Ur`
+- If `Tsimp = Tcheck extends Texds ? Tl : Tr` and `Usimp` is not a conditional type
+  - Let `Tconstraint = constraint(Tsimp)`
+
+
+
